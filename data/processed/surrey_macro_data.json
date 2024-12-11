@@ -1,0 +1,140 @@
+{
+  "filename": "surrey_macro_data.json",
+  "filepath": "./surrey_macro_data.json",
+  "content": {
+    "macro_indicators": {
+      "supply_metrics": {
+        "construction_starts": {
+          "recent_trends": {
+            "2024": {
+              "ytd_starts": 2958,
+              "monthly_data": [
+                {"month": "2024-01", "starts": 331},
+                {"month": "2024-02", "starts": 795},
+                {"month": "2024-03", "starts": 574},
+                {"month": "2024-04", "starts": 153},
+                {"month": "2024-05", "starts": 231},
+                {"month": "2024-06", "starts": 85},
+                {"month": "2024-07", "starts": 573},
+                {"month": "2024-08", "starts": 50},
+                {"month": "2024-09", "starts": 166}
+              ]
+            },
+            "2023": {
+              "total_starts": 5228,
+              "peak_month": {"month": "2023-07", "starts": 971}
+            }
+          },
+          "historical_analysis": {
+            "five_year_averages": {
+              "2020_2024": 3512,
+              "2015_2019": 1876,
+              "2010_2014": 984
+            }
+          }
+        },
+        "completions": {
+          "recent_trends": {
+            "2024": {
+              "ytd_completions": 1193,
+              "monthly_data": [
+                {"month": "2024-01", "completions": 294},
+                {"month": "2024-02", "completions": 0},
+                {"month": "2024-03", "completions": 36},
+                {"month": "2024-04", "completions": 141},
+                {"month": "2024-05", "completions": 35},
+                {"month": "2024-06", "completions": 77},
+                {"month": "2024-07", "completions": 96},
+                {"month": "2024-08", "completions": 0},
+                {"month": "2024-09", "completions": 514}
+              ]
+            },
+            "2023": {
+              "total_completions": 1342,
+              "peak_month": {"month": "2023-08", "completions": 598}
+            }
+          }
+        }
+      },
+      "employment_metrics": {
+        "current_statistics": {
+          "as_of": "2024-09",
+          "employment_rate": 0.624,
+          "unemployment_rate": 0.065,
+          "participation_rate": 0.668,
+          "total_employment": 1598300,
+          "total_labour_force": 1710100
+        },
+        "historical_trends": {
+          "2024_ytd": {
+            "employment_rate": {
+              "average": 0.641,
+              "trend": "decreasing",
+              "peak": {
+                "rate": 0.647,
+                "month": "2024-02"
+              }
+            }
+          }
+        }
+      },
+      "income_metrics": {
+        "household_income": {
+          "current": {
+            "year": 2021,
+            "average_income": 116600,
+            "median_income": 98000
+          },
+          "historical": {
+            "year": 2016,
+            "average_income": 93586,
+            "median_income": 77494
+          },
+          "growth_metrics": {
+            "average_income_growth": {
+              "percentage": 24.59,
+              "cagr": 4.49
+            }
+          }
+        }
+      },
+      "interest_rates": {
+        "current": {
+          "as_of": "2024-09",
+          "rates": {
+            "1yr_fixed": 5.99,
+            "3yr_fixed": 4.49,
+            "5yr_fixed": 3.94,
+            "10yr_fixed": 5.24
+          }
+        },
+        "historical_trends": {
+          "5yr_fixed": {
+            "2024_avg": 4.52,
+            "2023_avg": 4.79,
+            "2022_avg": 3.55,
+            "2021_avg": 1.74,
+            "2020_avg": 1.92
+          }
+        }
+      },
+      "market_correlations": {
+        "employment_housing": {
+          "price_correlation": 0.72,
+          "absorption_correlation": 0.65,
+          "supply_correlation": 0.45
+        },
+        "interest_rate_impact": {
+          "price_correlation": -0.42,
+          "absorption_correlation": -0.65,
+          "supply_correlation": -0.38
+        },
+        "income_impact": {
+          "price_correlation": 0.78,
+          "absorption_correlation": 0.45,
+          "supply_correlation": 0.52
+        }
+      }
+    }
+  }
+}
