@@ -1050,6 +1050,7 @@ def main():
                 {'studios': {'count': 34}, 'one_bed': {'count': 204}, 
                  'two_bed': {'count': 120}, 'three_bed': {'count': 18}}.items()
             )
+        )   
         
         # Layout for key metrics
         col1, col2, col3 = st.columns(3)

@@ -11,7 +11,6 @@ def run_market_analysis(completions_file: str,
                        pricing_file: str, 
                        rates_file: str,
                        excel_output: str = 'Surrey_Market_Analysis.xlsx',
-                       pdf_output: str = 'Surrey_Market_Analysis.pdf',
                        data_dir: str = 'data',
                        use_cached_data: bool = True) -> None:
     """
@@ -90,13 +89,8 @@ def run_market_analysis(completions_file: str,
     print("Generating Excel report...")
     report_gen.generate_report(excel_output)
     
-    # Generate PDF report
-    print("Generating PDF report...")
-    report_gen.generate_pdf_report(pdf_output)
-    
     print(f"Analysis complete! Results saved to:")
     print(f"- Excel: {excel_output}")
-    print(f"- PDF: {pdf_output}")
 
 # Example usage
 if __name__ == "__main__":
@@ -105,7 +99,6 @@ if __name__ == "__main__":
         'Surrey pricing.csv',
         'discounted_mortgage_rates.csv',
         excel_output='Surrey_Market_Analysis.xlsx',
-        pdf_output='Surrey_Market_Analysis.pdf',
         data_dir='data',
         use_cached_data=True
     )
