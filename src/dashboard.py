@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scenario_analyzer import PricingScenarioAnalyzer
 from market_analyzer import MarketAnalyzer
+from report_generator import ReportGenerator
 import os
 from datetime import datetime
 from openai import OpenAI
