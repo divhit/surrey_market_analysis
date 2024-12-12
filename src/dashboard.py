@@ -13,8 +13,12 @@ import glob
 import time
 from typing import Dict, Union
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+# Initialize OpenAI client with API key from Streamlit secrets
+if 'OPENAI_API_KEY' not in st.secrets:
+    st.error('OPENAI_API_KEY is not set in the Streamlit secrets.')
+    st.stop()
+
+client = OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 # Page config
 st.set_page_config(
@@ -1046,7 +1050,6 @@ def main():
                 {'studios': {'count': 34}, 'one_bed': {'count': 204}, 
                  'two_bed': {'count': 120}, 'three_bed': {'count': 18}}.items()
             )
-        )
         
         # Layout for key metrics
         col1, col2, col3 = st.columns(3)

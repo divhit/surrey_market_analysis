@@ -1,3 +1,6 @@
+# Streamlit secrets
+.streamlit/secrets.toml
+
 # Python
 __pycache__/
 *.py[cod]
@@ -31,13 +34,6 @@ ENV/
 *.swp
 *.swo
 
-# Project specific
-*.xlsx
-*.xls
-*.csv
-.env
-.streamlit/secrets.toml
-
-# OS specific
+# OS
 .DS_Store
 Thumbs.db 
