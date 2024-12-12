@@ -182,184 +182,199 @@ def run_staged_analysis():
     pricing_progress = st.empty()
     pricing_expander = st.empty()
     
-    # Stage 1: Market Supply Analysis
-    supply_container.write("🔄 Stage 1: Analyzing Market Supply...")
-    for i in range(100):
-        supply_progress.progress(i + 1)
-        time.sleep(0.02)
-    
-    with supply_expander.expander("Supply Analysis Results", expanded=True):
-        st.write("Current Inventory Status:")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Active Projects", "2,672 units")
-            st.metric("Standing Inventory", "895 units")
-        with col2:
-            st.metric("Total Pipeline", "7,053 units")
-            st.metric("Months of Supply", "14.2 months")
+    try:
+        # Load data
+        project_data, macro_data = load_data()
         
-        st.write("Construction Activity (Monthly Trend):")
-        construction_data = {
-            'Period': [
-                # 2019
-                '2019-01', '2019-02', '2019-03', '2019-04', '2019-05', '2019-06',
-                '2019-07', '2019-08', '2019-09', '2019-10', '2019-11', '2019-12',
-                # 2020
-                '2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06',
-                '2020-07', '2020-08', '2020-09', '2020-10', '2020-11', '2020-12',
-                # 2021
-                '2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06',
-                '2021-07', '2021-08', '2021-09', '2021-10', '2021-11', '2021-12',
-                # 2022
-                '2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06',
-                '2022-07', '2022-08', '2022-09', '2022-10', '2022-11', '2022-12',
-                # 2023
-                '2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06',
-                '2023-07', '2023-08', '2023-09', '2023-10', '2023-11', '2023-12',
-                # 2024
-                '2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06',
-                '2024-07', '2024-08', '2024-09'
-            ],
-            'Starts': [
-                # 2019
-                0, 0, 0, 492, 72, 422, 0, 54, 0, 231, 328, 71,
-                # 2020
-                27, 58, 0, 0, 0, 0, 507, 0, 79, 351, 0, 40,
-                # 2021
-                0, 0, 539, 112, 147, 732, 93, 108, 123, 300, 0, 0,
-                # 2022
-                0, 109, 0, 0, 221, 0, 36, 86, 9, 619, 339, 940,
-                # 2023
-                193, 287, 631, 758, 47, 658, 971, 335, 262, 817, 201, 93,
-                # 2024
-                331, 795, 574, 153, 231, 85, 573, 574, 166
-            ],
-            'Completions': [
-                # 2019
-                126, 0, 117, 89, 124, 0, 178, 0, 485, 93, 0, 0,
-                # 2020
-                29, 305, 0, 0, 398, 0, 0, 0, 3, 0, 0, 190,
-                # 2021
-                0, 0, 55, 161, 0, 125, 0, 0, 765, 0, 0, 67,
-                # 2022
-                112, 0, 140, 0, 550, 156, 166, 0, 0, 0, 351, 0,
-                # 2023
-                71, 0, 0, 241, 0, 0, 108, 598, 0, 0, 179, 145,
-                # 2024
-                294, 0, 36, 141, 35, 77, 96, 0, 514
-            ]
-        }
-        df_construction = pd.DataFrame(construction_data)
-        df_construction.set_index('Period', inplace=True)
-        st.line_chart(df_construction)
+        # Stage 1: Market Supply Analysis
+        supply_container.write("🔄 Stage 1: Analyzing Market Supply...")
+        for i in range(100):
+            supply_progress.progress(i + 1)
+            time.sleep(0.02)
         
-        # Add summary metrics
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Total Starts (2023)", "5,253 units")
-            st.metric("Total Completions (2023)", "1,342 units")
-        with col2:
-            st.metric("Highest Monthly Start", "971 units (Jul 2023)")
-            st.metric("Highest Monthly Completion", "765 units (Sep 2021)")
-    time.sleep(1)
-    
-    # Stage 2: Historical Performance Analysis
-    historical_container.write("🔄 Stage 2: Analyzing Historical Performance...")
-    for i in range(100):
-        historical_progress.progress(i + 1)
-        time.sleep(0.02)
-    
-    with historical_expander.expander("Historical Analysis Results", expanded=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Market Monthly Absorption", "3.6%")
-            st.metric("Sales Velocity Index", "1.2")
-        with col2:
-            st.metric("Historical Price Growth", "+24.6%")
-            st.metric("Price Growth CAGR", "4.5%")
-    time.sleep(1)
-    
-    # Stage 3: Competitive Analysis
-    competitive_container.write("🔄 Stage 3: Analyzing Competitive Landscape...")
-    for i in range(100):
-        competitive_progress.progress(i + 1)
-        time.sleep(0.02)
-    
-    with competitive_expander.expander("Competitive Analysis Results", expanded=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Market Average PSF", "$1,145")
-            st.metric("Our Position vs Market", "Above Average")
-        with col2:
-            st.metric("Active Competitors", "7 projects")
-            st.metric("Competitive Price Range", "$1,018 - $1,230 PSF")
-    time.sleep(1)
-    
-    # Stage 4: Macro Factor Analysis
-    macro_container.write("🔄 Stage 4: Analyzing Macro Factors...")
-    for i in range(100):
-        macro_progress.progress(i + 1)
-        time.sleep(0.02)
-    
-    with macro_expander.expander("Macro Analysis Results", expanded=True):
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Employment Rate", "62.4%", "+0.2%")
-            st.metric("Median Household Income", "$98,670", "+3.2%")
-        with col2:
-            st.metric("5-Year Fixed Rate", "4.52%", "-0.27%")
-            st.metric("Prime Rate", "6.95%", "+0.25%")
+        with supply_expander.expander("Supply Analysis Results", expanded=True):
+            st.write("Current Inventory Status:")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Active Projects", "2,672 units")
+                st.metric("Standing Inventory", "895 units")
+            with col2:
+                st.metric("Total Pipeline", "7,053 units")
+                st.metric("Months of Supply", "14.2 months")
             
-        st.write("Historical Interest Rate Trends:")
-        rate_data = {
-            'Period': [
-                '2020-Q1', '2020-Q2', '2020-Q3', '2020-Q4',
-                '2021-Q1', '2021-Q2', '2021-Q3', '2021-Q4',
-                '2022-Q1', '2022-Q2', '2022-Q3', '2022-Q4',
-                '2023-Q1', '2023-Q2', '2023-Q3', '2023-Q4',
-                '2024-Q1', '2024-Q2'  # Added 2024 projections
-            ],
-            '5-Year Fixed': [
-                2.89, 2.45, 2.14, 1.99,
-                2.14, 2.45, 2.89, 3.24,
-                3.89, 4.25, 4.89, 5.12,
-                5.24, 4.89, 4.67, 4.52,
-                4.45, 4.25  # 2024 projections
-            ],
-            'Prime Rate': [
-                3.95, 3.45, 2.95, 2.45,
-                2.45, 2.45, 2.45, 2.45,
-                3.70, 4.70, 5.45, 6.45,
-                6.70, 6.95, 6.95, 6.95,
-                6.70, 6.45  # 2024 projections
-            ]
-        }
-        df_rates = pd.DataFrame(rate_data)
-        df_rates.set_index('Period', inplace=True)
-        st.line_chart(df_rates)
-    time.sleep(1)
-    
-    # Stage 5: Price Optimization
-    pricing_container.write("🔄 Stage 5: Optimizing Pricing Strategy...")
-    for i in range(100):
-        pricing_progress.progress(i + 1)
-        time.sleep(0.02)
-    
-    with pricing_expander.expander("Pricing Strategy Results", expanded=True):
-        pricing_data = {
-            'Unit Type': ['Studios', 'One Bed', 'Two Bed', 'Three Bed'],
-            'Target PSF': ['$1,241.95', '$1,146.74', '$1,068.63', '$1,036.32'],
-            'Monthly Absorption': ['5.4%', '5.4%', '5.4%', '5.4%']
-        }
-        st.dataframe(pd.DataFrame(pricing_data))
-    time.sleep(1)
-    
-    # Final Report Generation
-    st.success("✅ Analysis Complete! Generating Excel Report...")
-    subprocess.run(["python", "src/main.py"], check=True)
-    
-    if os.path.exists('Surrey_Market_Analysis.xlsx'):
-        with open('Surrey_Market_Analysis.xlsx', 'rb') as f:
+            st.write("Construction Activity (Monthly Trend):")
+            construction_data = {
+                'Period': [
+                    # 2019
+                    '2019-01', '2019-02', '2019-03', '2019-04', '2019-05', '2019-06',
+                    '2019-07', '2019-08', '2019-09', '2019-10', '2019-11', '2019-12',
+                    # 2020
+                    '2020-01', '2020-02', '2020-03', '2020-04', '2020-05', '2020-06',
+                    '2020-07', '2020-08', '2020-09', '2020-10', '2020-11', '2020-12',
+                    # 2021
+                    '2021-01', '2021-02', '2021-03', '2021-04', '2021-05', '2021-06',
+                    '2021-07', '2021-08', '2021-09', '2021-10', '2021-11', '2021-12',
+                    # 2022
+                    '2022-01', '2022-02', '2022-03', '2022-04', '2022-05', '2022-06',
+                    '2022-07', '2022-08', '2022-09', '2022-10', '2022-11', '2022-12',
+                    # 2023
+                    '2023-01', '2023-02', '2023-03', '2023-04', '2023-05', '2023-06',
+                    '2023-07', '2023-08', '2023-09', '2023-10', '2023-11', '2023-12',
+                    # 2024
+                    '2024-01', '2024-02', '2024-03', '2024-04', '2024-05', '2024-06',
+                    '2024-07', '2024-08', '2024-09'
+                ],
+                'Starts': [
+                    # 2019
+                    0, 0, 0, 492, 72, 422, 0, 54, 0, 231, 328, 71,
+                    # 2020
+                    27, 58, 0, 0, 0, 0, 507, 0, 79, 351, 0, 40,
+                    # 2021
+                    0, 0, 539, 112, 147, 732, 93, 108, 123, 300, 0, 0,
+                    # 2022
+                    0, 109, 0, 0, 221, 0, 36, 86, 9, 619, 339, 940,
+                    # 2023
+                    193, 287, 631, 758, 47, 658, 971, 335, 262, 817, 201, 93,
+                    # 2024
+                    331, 795, 574, 153, 231, 85, 573, 574, 166
+                ],
+                'Completions': [
+                    # 2019
+                    126, 0, 117, 89, 124, 0, 178, 0, 485, 93, 0, 0,
+                    # 2020
+                    29, 305, 0, 0, 398, 0, 0, 0, 3, 0, 0, 190,
+                    # 2021
+                    0, 0, 55, 161, 0, 125, 0, 0, 765, 0, 0, 67,
+                    # 2022
+                    112, 0, 140, 0, 550, 156, 166, 0, 0, 0, 351, 0,
+                    # 2023
+                    71, 0, 0, 241, 0, 0, 108, 598, 0, 0, 179, 145,
+                    # 2024
+                    294, 0, 36, 141, 35, 77, 96, 0, 514
+                ]
+            }
+            df_construction = pd.DataFrame(construction_data)
+            df_construction.set_index('Period', inplace=True)
+            st.line_chart(df_construction)
+        
+        # Stage 2: Historical Performance Analysis
+        historical_container.write("🔄 Stage 2: Analyzing Historical Performance...")
+        for i in range(100):
+            historical_progress.progress(i + 1)
+            time.sleep(0.02)
+        
+        with historical_expander.expander("Historical Analysis Results", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Market Monthly Absorption", "3.6%")
+                st.metric("Sales Velocity Index", "1.2")
+            with col2:
+                st.metric("Historical Price Growth", "+24.6%")
+                st.metric("Price Growth CAGR", "4.5%")
+        time.sleep(1)
+        
+        # Stage 3: Competitive Analysis
+        competitive_container.write("🔄 Stage 3: Analyzing Competitive Landscape...")
+        for i in range(100):
+            competitive_progress.progress(i + 1)
+            time.sleep(0.02)
+        
+        with competitive_expander.expander("Competitive Analysis Results", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Market Average PSF", "$1,145")
+                st.metric("Our Position vs Market", "Above Average")
+            with col2:
+                st.metric("Active Competitors", "7 projects")
+                st.metric("Competitive Price Range", "$1,018 - $1,230 PSF")
+        time.sleep(1)
+        
+        # Stage 4: Macro Factor Analysis
+        macro_container.write("🔄 Stage 4: Analyzing Macro Factors...")
+        for i in range(100):
+            macro_progress.progress(i + 1)
+            time.sleep(0.02)
+        
+        with macro_expander.expander("Macro Analysis Results", expanded=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Employment Rate", "62.4%", "+0.2%")
+                st.metric("Median Household Income", "$98,670", "+3.2%")
+            with col2:
+                st.metric("5-Year Fixed Rate", "4.52%", "-0.27%")
+                st.metric("Prime Rate", "6.95%", "+0.25%")
+            
+            st.write("Historical Interest Rate Trends:")
+            rate_data = {
+                'Period': [
+                    '2020-Q1', '2020-Q2', '2020-Q3', '2020-Q4',
+                    '2021-Q1', '2021-Q2', '2021-Q3', '2021-Q4',
+                    '2022-Q1', '2022-Q2', '2022-Q3', '2022-Q4',
+                    '2023-Q1', '2023-Q2', '2023-Q3', '2023-Q4',
+                    '2024-Q1', '2024-Q2'  # Added 2024 projections
+                ],
+                '5-Year Fixed': [
+                    2.89, 2.45, 2.14, 1.99,
+                    2.14, 2.45, 2.89, 3.24,
+                    3.89, 4.25, 4.89, 5.12,
+                    5.24, 4.89, 4.67, 4.52,
+                    4.45, 4.25  # 2024 projections
+                ],
+                'Prime Rate': [
+                    3.95, 3.45, 2.95, 2.45,
+                    2.45, 2.45, 2.45, 2.45,
+                    3.70, 4.70, 5.45, 6.45,
+                    6.70, 6.95, 6.95, 6.95,
+                    6.70, 6.45  # 2024 projections
+                ]
+            }
+            df_rates = pd.DataFrame(rate_data)
+            df_rates.set_index('Period', inplace=True)
+            st.line_chart(df_rates)
+        time.sleep(1)
+        
+        # Stage 5: Price Optimization
+        pricing_container.write("🔄 Stage 5: Optimizing Pricing Strategy...")
+        for i in range(100):
+            pricing_progress.progress(i + 1)
+            time.sleep(0.02)
+        
+        with pricing_expander.expander("Pricing Strategy Results", expanded=True):
+            pricing_data = {
+                'Unit Type': ['Studios', 'One Bed', 'Two Bed', 'Three Bed'],
+                'Target PSF': ['$1,241.95', '$1,146.74', '$1,068.63', '$1,036.32'],
+                'Monthly Absorption': ['5.4%', '5.4%', '5.4%', '5.4%']
+            }
+            st.dataframe(pd.DataFrame(pricing_data))
+        time.sleep(1)
+        
+        # Final Report Generation
+        st.success("✅ Analysis Complete! Generating Excel Report...")
+        
+        # Initialize analyzers
+        analyzer = MarketAnalyzer(project_data, macro_data)
+        market_analysis = analyzer.analyze_market()
+        
+        # Get market metrics for pricing strategy
+        market_metrics = project_data['market_metrics']
+        base_psf = market_metrics['pricing_trends']['market_average_psf']
+        
+        # Generate Excel report directly
+        report_gen = ReportGenerator(
+            market_analyzer=analyzer,
+            pricing_strategy={
+                'base_psf': base_psf,
+                'absorption_trends': market_metrics['absorption_trends'],
+                'pricing_trends': market_metrics['pricing_trends']
+            },
+            simulation_results=None  # We're not running simulations in the dashboard
+        )
+        
+        excel_output = 'Surrey_Market_Analysis.xlsx'
+        report_gen.generate_report(excel_output)
+        
+        # Offer download button for the generated Excel file
+        with open(excel_output, 'rb') as f:
             st.download_button(
                 label="📊 Download Complete Market Analysis",
                 data=f,
@@ -367,6 +382,10 @@ def run_staged_analysis():
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 key="base_download"
             )
+            
+    except Exception as e:
+        st.error(f"Error during analysis: {str(e)}")
+        st.stop()
 
 def run_scenario_analysis(scenario: dict, results: dict) -> tuple[str, str]:
     """Run the main.py script with the given scenario parameters and calculated PSFs"""
