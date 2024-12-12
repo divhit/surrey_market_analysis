@@ -1,0 +1,5 @@
+geo_code,geo_name,census_year,characteristic_id,characteristic_name,value
+5915004,Surrey,2016,751,Average total income of household,93586
+5915004,Surrey,2021,252,Average total income of household,116600
+5915004,Surrey,2016,742,Median total income of household,77494
+5915004,Surrey,2021,243,Median total income of household,98000

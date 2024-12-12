@@ -1,0 +1,135 @@
+{
+  "filename": "surrey_project_data.json",
+  "filepath": "./surrey_project_data.json",
+  "content": {
+    "project_data": {
+      "active_projects": {
+        "total_count": 7,
+        "total_units": 2672,
+        "total_sold": 1777,
+        "absorption_rate": 66.5,
+        "projects": [
+          {
+            "name": "The Manhattan",
+            "developer": "ML Emporio",
+            "address": "10284 133A Street",
+            "total_units": 422,
+            "units_sold": 50,
+            "sales_start": "2024-10-05",
+            "completion": "2029-10-01",
+            "status": "Pre-Construction",
+            "current_absorption": 11.8,
+            "construction_status": "Pre-Construction",
+            "pricing": {
+              "studios": {
+                "size_range": [297, 343],
+                "price_range": [409900, 435900],
+                "avg_psf": 1325.5,
+                "available_units": 2
+              },
+              "one_bed": {
+                "size_range": [462, 478],
+                "price_range": [549900, 591900],
+                "avg_psf": 1214,
+                "available_units": 2
+              },
+              "two_bed": {
+                "size_range": [639, 730],
+                "price_range": [674900, 783900],
+                "avg_psf": 1076,
+                "available_units": 2
+              },
+              "three_bed": {
+                "size_range": [724, 724],
+                "price_range": [774900, 774900],
+                "avg_psf": 1070,
+                "available_units": 1
+              }
+            }
+          },
+          {
+            "name": "Parkway 2 - Intersect",
+            "developer": "Bosa",
+            "address": "10460 City Parkway",
+            "total_units": 396,
+            "units_sold": 150,
+            "sales_start": "2024-04-08",
+            "completion": "2028-12-31",
+            "status": "Pre-Construction",
+            "current_absorption": 37.9,
+            "construction_status": "Lot cleared",
+            "pricing": {
+              "one_bed": {
+                "size_range": [405, 773],
+                "price_range": [400000, 800000],
+                "avg_psf": 1143,
+                "available_units": 3
+              },
+              "two_bed": {
+                "size_range": [689, 773],
+                "price_range": [700000, 900000],
+                "avg_psf": 1090,
+                "available_units": 2
+              }
+            }
+          }
+        ]
+      },
+      "sold_out_projects": {
+        "total_count": 10,
+        "total_units": 3203,
+        "projects": [
+          {
+            "name": "Lucent",
+            "developer": "Landa Global",
+            "address": "13525 106 Ave",
+            "total_units": 404,
+            "sales_start": "2023-02-04",
+            "completion": "2026-12-31",
+            "months_to_sellout": 6,
+            "final_psf": 1163
+          }
+        ]
+      },
+      "market_metrics": {
+        "absorption_trends": {
+          "current_absorption_rate": 61,
+          "months_to_threshold": 4,
+          "threshold_target": 75,
+          "price_sensitivity": {
+            "under_1100_psf": {
+              "absorption_rate": 65,
+              "months_to_threshold": 3.5
+            },
+            "1100_to_1200_psf": {
+              "absorption_rate": 61,
+              "months_to_threshold": 4
+            },
+            "above_1200_psf": {
+              "absorption_rate": 57,
+              "months_to_threshold": 4.5
+            }
+          }
+        },
+        "pricing_trends": {
+          "market_average_psf": 1145,
+          "by_project": {
+            "Vivere": 1141,
+            "Parksville_96": 1230,
+            "Parkway_2": 1190,
+            "Juno": 1018,
+            "Sky_Living": 1100,
+            "Sequoia": 1163,
+            "Georgetown_Two": 1100,
+            "Lucent": 1163
+          }
+        },
+        "supply_pipeline": {
+          "under_construction": 4228,
+          "pre_construction": 2622,
+          "total_pipeline": 6850
+        }
+      }
+    }
+  }
+}

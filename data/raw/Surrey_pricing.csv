@@ -1,0 +1,66 @@
+source_url,beds,baths,price,sqft,status,unit_number,psf
+Manhattan,,,,,,,
+https://www.livabl.com/surrey-bc/the-manhattan,3,,"$774,900",724,available,F3,"1,070"
+,1,,"$549,900",462,available,B1 Plan,"1,190"
+,2,,"$674,900",730,available,D4,925
+,0,,"$435,900 ",343,available,A5,"1,271"
+,2,,"$783,900.00 ",639,available,D2,"1,227"
+,1,,"$591,900 ",478,available,B2,"1,238"
+,0,,"$409,900 ",297,available,A2,"1,380"
+,,,,,,,
+,,,,,,,
+Parkway 2 - Intersect,,,,,,,
+https://www.livabl.com/surrey-bc/parkway-2--intersect,1,1,"$800,000",773,available,D4m,"1,035"
+,2,1.5,"$700,000",689,available,D2m Plan,"1,016"
+,2,2,"$900,000",773,available,D4 Plan,"1,164"
+,1,1,"$600,000",501,available,B4,"1,198"
+,1,1,"$600,000",502,available,B4m,"1,195"
+,2,1.5,"$800,000",690,available,D2,"1,159"
+,2,1,"$700,000",591,available,C1,"1,184"
+,1,1,"$400,000",405,available,A2,988
+,1,1,"$600,000",497,available,B3,"1,207"
+,1,1,"$600,000",497,available,,"1,207"
+,1,1,"$500,000",406,available,A2m,"1,232"
+Sequoia 1,,,,,,,
+https://www.livabl.com/surrey-bc/sequoia1,2,1,"$730,000",732,available,B Plan,997
+,1,1,"$550,000",571,available,D3,963
+,1,1,"$530,000",501,available,D2B,"1,058"
+,1,1,"$530,000",586,available,B1 Plan,904
+,1,1,"$530,000",532,available,C1,996
+,1,1,"$530,000",475,for sale,J1,1116
+,1,1,"$550,000",496,available,J Plan,"1,109"
+,1,1,"$530,000",502,for sale,D1A,"1,056"
+,3,2,"$830,000",881,available,E Plan,942
+,1,1,"$550,000",578,available,D Plan,952
+Georgetown 2,,,,,,,
+https://www.livabl.com/surrey-bc/georgetown-two,2,2,"$727,900",784,available,D1,928
+,1,1,"$385,900",363,available,A Plan,1063
+,1,1,"$530,900",495,for sale,B1a,1072
+,2,2,"$715,900",763,for sale,D Plan,null
+,1,1,"$416,900",410,available,A1,"1,016"
+,1,1,"$520,900",504,available,B1,"1,032"
+,1,1,"$535,900",533,available,B2,"1,007"
+,1,1,"$575,900",559,for sale,B3,unknown
+,1,1,,548,available,C Plan,
+,1,1,"$505,900",453,available,B Plan,N/A
+,2,2,"$675,900",781,available,D1a,865
+,1,1,"$415,900",410,for sale,A1a,
+Century City Hollan Park (Tower 1),,,,,,,
+https://www.livabl.com/surrey-bc/century-city-holland-park--tower-1,1,1,"$749,900",521,available,Penthouse,"1,439"
+,1,1,"$839,900",666,for sale,B5,"1,261"
+,2,2,"$867,900",816,for sale,C4,"1,064"
+,1,1,"$652,900",547,available,A5,1194
+,1,1,"$789,900",545,available,B3,"1,449"
+,2,2,"$980,900",967,for sale,D4,"1,014"
+Parkway 2 - Intersect,,,,,,,
+https://www.livabl.com/surrey-bc/parkway-2--intersect,1,1,"$800,000",773,available,D4m,"1,035"
+,2,1.5,"$700,000",689,available,D2m,1016
+,2,2,"$900,000",773,available,D4,"1,164"
+,1,1,"$600,000",501,for sale,B4,"1,198"
+,1,1,"$600,000",502,available,B4m,"$1,195"
+,2,1,"$800,000",690,available,D2,"1,159"
+,2,1,"$700,000",591,available,C1,"1,184"
+,1,1,"$400,000",405,for sale,A2 Plan,$988
+,1,1,"$600,000",497,available,B3 Plan,"1,207"
+,1,1,"$600,000",497,available,B3m,"1,207"
+,1,1,"$500,000",406,available,A2m,"1,232"
