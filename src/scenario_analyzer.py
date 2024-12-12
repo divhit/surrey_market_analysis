@@ -60,14 +60,16 @@ class PricingScenarioAnalyzer:
         if 'interest_rate_change' in scenario:
             if 'interest_rates' in macro_indicators and 'current' in macro_indicators['interest_rates']:
                 current_rate = macro_indicators['interest_rates']['current']['rates']['5yr_fixed']
-                new_rate = current_rate * (1 + scenario['interest_rate_change'] / 100)
+                new_rate = current_rate * (1 + scenario['interest_rate_change'] / 10000)  # Convert bps to decimal
                 macro_indicators['interest_rates']['current']['rates']['5yr_fixed'] = new_rate
         
         if 'employment_change' in scenario:
             if 'employment_metrics' in macro_indicators and 'current_statistics' in macro_indicators['employment_metrics']:
                 current_rate = macro_indicators['employment_metrics']['current_statistics']['employment_rate']
-                new_rate = current_rate * (1 + scenario['employment_change'] / 100)
+                new_rate = current_rate * (1 + scenario['employment_change'] / 100)  # Convert percentage to decimal
                 macro_indicators['employment_metrics']['current_statistics']['employment_rate'] = new_rate
+                # Also store the employment change for use in impact calculations
+                macro_indicators['employment_metrics']['scenario_change'] = scenario['employment_change']
         
         if 'supply_change' in scenario:
             # Update supply metrics based on scenario
@@ -111,6 +113,38 @@ class PricingScenarioAnalyzer:
             'two_bed': {'base_psf': target_psfs['two_bed']},
             'three_bed': {'base_psf': target_psfs['three_bed']}
         }
+        
+        # Add pricing constraints
+        pricing_constraints = {
+            'studios': {
+                'sample_size': 5,
+                'size_difference': 'Comparables range from 297-410 sqft',
+                'avg_size_diff_pct': -12.5,  # Updated based on actual data
+                'confidence': 'Medium - Adequate comparable set'
+            },
+            'one_bed': {
+                'sample_size': 16,
+                'size_difference': 'Comparable sizes range from 462-666 sqft',
+                'avg_size_diff_pct': -3.2,  # Updated based on actual data
+                'confidence': 'High - Extensive comparable set'
+            },
+            'two_bed': {
+                'sample_size': 10,
+                'size_difference': 'Comparable sizes range from 639-967 sqft',
+                'avg_size_diff_pct': 2.8,  # Updated based on actual data
+                'confidence': 'High - Good comparable set'
+            },
+            'three_bed': {
+                'sample_size': 3,
+                'size_difference': 'Limited comparables, 724-881 sqft range',
+                'avg_size_diff_pct': 8.5,  # Updated based on actual data
+                'confidence': 'Medium-Low - Limited comparable set'
+            }
+        }
+        
+        # Add constraints to base pricing data
+        for unit_type in base_pricing:
+            base_pricing[unit_type]['constraints'] = pricing_constraints[unit_type]
         
         # Initialize scenario PSFs same as base
         for unit_type in base_pricing:

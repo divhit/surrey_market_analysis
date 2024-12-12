@@ -11,6 +11,7 @@ from openai import OpenAI
 import subprocess
 import glob
 import time
+from typing import Dict, Union
 
 # Initialize OpenAI client
 client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
@@ -403,10 +404,42 @@ def generate_revenue_tables(results: dict) -> str:
     
     # Fixed absorption targets
     absorption_targets = {
-        '3_Month': 0.50,    # 50% by month 3
-        '12_Month': 0.65,   # 65% by month 12
-        '24_Month': 0.825,  # 82.5% by month 24
-        '36_Month': 1.00    # 100% by month 36
+        '3_Month': {'target': 0.50, 'months': 3},    # 50% by month 3
+        '12_Month': {'target': 0.65, 'months': 12},   # 65% by month 12
+        '24_Month': {'target': 0.825, 'months': 24},  # 82.5% by month 24
+        '36_Month': {'target': 1.00, 'months': 36}    # 100% by month 36
+    }
+    
+    # Monthly absorption targets by year
+    yearly_targets = {
+        1: {'April': 0.1667, 'May': 0.1667, 'June': 0.1667,  # Year 1 (16.67% for Q1)
+            'July': 0.0167, 'August': 0.0167, 'September': 0.0167,
+            'October': 0.0167, 'November': 0.0167, 'December': 0.0167,
+            'January': 0.0167, 'February': 0.0167, 'March': 0.0167},
+        2: {'April': 0.0146, 'May': 0.0146, 'June': 0.0146,  # Year 2 (1.46% each month)
+            'July': 0.0146, 'August': 0.0146, 'September': 0.0146,
+            'October': 0.0146, 'November': 0.0146, 'December': 0.0146,
+            'January': 0.0146, 'February': 0.0146, 'March': 0.0146},
+        3: {'April': 0.0146, 'May': 0.0146, 'June': 0.0146,  # Year 3 (1.46% each month)
+            'July': 0.0146, 'August': 0.0146, 'September': 0.0146,
+            'October': 0.0146, 'November': 0.0146, 'December': 0.0146,
+            'January': 0.0146, 'February': 0.0146, 'March': 0.0146}
+    }
+    
+    # Monthly pricing patterns with incentives
+    monthly_patterns = {
+        'April': {'price_factor': 1.000, 'incentives': {'studios': 5.5, 'one_bed': 5.5, 'two_bed': 6.0, 'three_bed': 6.5}},
+        'May': {'price_factor': 1.000, 'incentives': {'studios': 5.5, 'one_bed': 5.5, 'two_bed': 6.0, 'three_bed': 6.5}},
+        'June': {'price_factor': 0.995, 'incentives': {'studios': 5.0, 'one_bed': 5.0, 'two_bed': 5.5, 'three_bed': 6.0}},
+        'July': {'price_factor': 0.970, 'incentives': {'studios': 2.5, 'one_bed': 2.5, 'two_bed': 3.0, 'three_bed': 3.5}},
+        'August': {'price_factor': 0.970, 'incentives': {'studios': 2.5, 'one_bed': 2.5, 'two_bed': 3.0, 'three_bed': 3.5}},
+        'September': {'price_factor': 0.970, 'incentives': {'studios': 2.5, 'one_bed': 2.5, 'two_bed': 3.0, 'three_bed': 3.5}},
+        'October': {'price_factor': 0.975, 'incentives': {'studios': 3.0, 'one_bed': 3.0, 'two_bed': 3.5, 'three_bed': 4.0}},
+        'November': {'price_factor': 0.980, 'incentives': {'studios': 3.5, 'one_bed': 3.5, 'two_bed': 4.0, 'three_bed': 4.5}},
+        'December': {'price_factor': 0.980, 'incentives': {'studios': 3.5, 'one_bed': 3.5, 'two_bed': 4.0, 'three_bed': 4.5}},
+        'January': {'price_factor': 0.985, 'incentives': {'studios': 4.0, 'one_bed': 4.0, 'two_bed': 4.5, 'three_bed': 5.0}},
+        'February': {'price_factor': 0.990, 'incentives': {'studios': 4.5, 'one_bed': 4.5, 'two_bed': 5.0, 'three_bed': 5.5}},
+        'March': {'price_factor': 0.990, 'incentives': {'studios': 4.5, 'one_bed': 4.5, 'two_bed': 5.0, 'three_bed': 5.5}}
     }
     
     # Create a timestamp for the filename
@@ -423,6 +456,42 @@ def generate_revenue_tables(results: dict) -> str:
         percent_fmt = workbook.add_format({'num_format': '0.0%'})
         percent_small_fmt = workbook.add_format({'num_format': '0.0%'})
         
+        # Calculate weighted average incentives for each period
+        period_incentives = {}
+        for period_name, period_info in absorption_targets.items():
+            months_to_consider = period_info['months']
+            total_absorption = 0
+            weighted_incentives = {
+                'studios': 0,
+                'one_bed': 0,
+                'two_bed': 0,
+                'three_bed': 0
+            }
+            
+            # Calculate weighted incentives based on monthly absorption
+            month_count = 0
+            for year in range(1, 4):  # 3 years
+                for month, absorption in yearly_targets[year].items():
+                    if month_count >= months_to_consider:
+                        break
+                    
+                    # Add weighted incentives for each unit type
+                    for unit_type in weighted_incentives.keys():
+                        incentive = monthly_patterns[month]['incentives'][unit_type]
+                        weighted_incentives[unit_type] += incentive * absorption
+                    
+                    total_absorption += absorption
+                    month_count += 1
+                if month_count >= months_to_consider:
+                    break
+            
+            # Normalize weighted incentives
+            if total_absorption > 0:
+                for unit_type in weighted_incentives:
+                    weighted_incentives[unit_type] /= total_absorption
+            
+            period_incentives[period_name] = weighted_incentives
+        
         for period_name, target_absorption in absorption_targets.items():
             # Calculate units for this absorption target
             revenue_data = []
@@ -433,40 +502,41 @@ def generate_revenue_tables(results: dict) -> str:
             for unit_type, impact in results['unit_impacts'].items():
                 mix = unit_mix[unit_type]
                 total_units = mix['count']
-                units_sold = round(total_units * target_absorption)
-                base_psf = impact['scenario_psf']
+                units_sold = round(total_units * target_absorption['target'])
+                net_psf = impact['scenario_psf']  # This is the net PSF
+                incentive_pct = period_incentives[period_name][unit_type] / 100
+                
+                # Back-calculate gross PSF from net PSF and incentive
+                gross_psf = net_psf / (1 - incentive_pct)
                 
                 # Gross Revenue Analysis
-                gross_psf = base_psf
                 volume = units_sold * gross_psf * mix['avg_size']
                 total_volume += volume
                 
                 revenue_data.append({
                     'Unit Type': unit_type.title(),
                     'Units': units_sold,
-                    '% Total': units_sold / (188 * target_absorption),
+                    '% Total': units_sold / (376 * target_absorption['target']),
                     '$ Volume': volume,
                     '% Total $': 0,  # Will be calculated after total is known
                     'Total SF': units_sold * mix['avg_size'],
-                    'Incentive': '5.5%' if unit_type != 'three_bed' else '6.0%',
+                    'Incentive': f"{incentive_pct*100:.1f}%",
                     'Avg PSF': gross_psf,
                     'Avg Size': mix['avg_size']
                 })
                 
                 # Net Revenue Analysis (After Incentives)
-                incentive_pct = 0.06 if unit_type == 'three_bed' else 0.055
-                net_psf = gross_psf * (1 - incentive_pct)
                 volume_net = units_sold * net_psf * mix['avg_size']
                 total_volume_net += volume_net
                 
                 revenue_data_net.append({
                     'Unit Type': unit_type.title(),
                     'Units': units_sold,
-                    '% Total': units_sold / (188 * target_absorption),
+                    '% Total': units_sold / (376 * target_absorption['target']),
                     '$ Volume': volume_net,
                     '% Total $': 0,  # Will be calculated after total is known
                     'Total SF': units_sold * mix['avg_size'],
-                    'Incentive': f"{incentive_pct:.1%}",
+                    'Incentive': f"{incentive_pct*100:.1f}%",
                     'Avg PSF': net_psf,
                     'Avg Size': mix['avg_size']
                 })
@@ -486,7 +556,7 @@ def generate_revenue_tables(results: dict) -> str:
             
             # Write title
             worksheet = workbook.add_worksheet(sheet_name)
-            worksheet.write(0, 0, 'Revenue Analysis - Target {}% Absorption'.format(int(target_absorption * 100)))
+            worksheet.write(0, 0, f'Revenue Analysis - Target {int(target_absorption["target"] * 100)}% Absorption')
             
             # Write Gross Revenue Analysis
             worksheet.write(2, 0, 'Gross Revenue Analysis')
@@ -563,38 +633,6 @@ def generate_revenue_tables(results: dict) -> str:
         monthly_data = []
         base_months = ['April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December', 'January', 'February', 'March']
         
-        # Monthly absorption targets by year
-        yearly_targets = {
-            1: {'April': 0.1667, 'May': 0.1667, 'June': 0.1667,  # Year 1 (16.67% for Q1)
-                'July': 0.0167, 'August': 0.0167, 'September': 0.0167,
-                'October': 0.0167, 'November': 0.0167, 'December': 0.0167,
-                'January': 0.0167, 'February': 0.0167, 'March': 0.0167},
-            2: {'April': 0.0146, 'May': 0.0146, 'June': 0.0146,  # Year 2 (1.46% each month)
-                'July': 0.0146, 'August': 0.0146, 'September': 0.0146,
-                'October': 0.0146, 'November': 0.0146, 'December': 0.0146,
-                'January': 0.0146, 'February': 0.0146, 'March': 0.0146},
-            3: {'April': 0.0146, 'May': 0.0146, 'June': 0.0146,  # Year 3 (1.46% each month)
-                'July': 0.0146, 'August': 0.0146, 'September': 0.0146,
-                'October': 0.0146, 'November': 0.0146, 'December': 0.0146,
-                'January': 0.0146, 'February': 0.0146, 'March': 0.0146}
-        }
-        
-        # Monthly pricing patterns
-        monthly_patterns = {
-            'April': {'price_factor': 1.000, 'incentives': {'studios': 5.5, 'one_bed': 5.5, 'two_bed': 6.0, 'three_bed': 6.5}},
-            'May': {'price_factor': 1.000, 'incentives': {'studios': 5.5, 'one_bed': 5.5, 'two_bed': 6.0, 'three_bed': 6.5}},
-            'June': {'price_factor': 0.995, 'incentives': {'studios': 5.0, 'one_bed': 5.0, 'two_bed': 5.5, 'three_bed': 6.0}},
-            'July': {'price_factor': 0.970, 'incentives': {'studios': 2.5, 'one_bed': 2.5, 'two_bed': 3.0, 'three_bed': 3.5}},
-            'August': {'price_factor': 0.970, 'incentives': {'studios': 2.5, 'one_bed': 2.5, 'two_bed': 3.0, 'three_bed': 3.5}},
-            'September': {'price_factor': 0.970, 'incentives': {'studios': 2.5, 'one_bed': 2.5, 'two_bed': 3.0, 'three_bed': 3.5}},
-            'October': {'price_factor': 0.975, 'incentives': {'studios': 3.0, 'one_bed': 3.0, 'two_bed': 3.5, 'three_bed': 4.0}},
-            'November': {'price_factor': 0.980, 'incentives': {'studios': 3.5, 'one_bed': 3.5, 'two_bed': 4.0, 'three_bed': 4.5}},
-            'December': {'price_factor': 0.980, 'incentives': {'studios': 3.5, 'one_bed': 3.5, 'two_bed': 4.0, 'three_bed': 4.5}},
-            'January': {'price_factor': 0.985, 'incentives': {'studios': 4.0, 'one_bed': 4.0, 'two_bed': 4.5, 'three_bed': 5.0}},
-            'February': {'price_factor': 0.990, 'incentives': {'studios': 4.5, 'one_bed': 4.5, 'two_bed': 5.0, 'three_bed': 5.5}},
-            'March': {'price_factor': 0.990, 'incentives': {'studios': 4.5, 'one_bed': 4.5, 'two_bed': 5.0, 'three_bed': 5.5}}
-        }
-        
         # Generate 36 months of data
         for year in range(1, 4):
             for month in base_months:
@@ -604,13 +642,13 @@ def generate_revenue_tables(results: dict) -> str:
                 row_data = {'Month': month, 'Target %': target}
                 
                 for unit_type, impact in results['unit_impacts'].items():
-                    base_psf = impact['scenario_psf']
-                    gross_psf = base_psf * pattern['price_factor']
-                    incentive = pattern['incentives'][unit_type] / 100
-                    net_psf = gross_psf * (1 - incentive)
+                    net_psf = impact['scenario_psf']  # This is the net PSF
+                    incentive = pattern['incentives'][unit_type]
+                    # Back-calculate gross PSF
+                    gross_psf = net_psf / (1 - incentive/100)
                     
                     row_data[f'{unit_type}_gross'] = gross_psf
-                    row_data[f'{unit_type}_incentive'] = pattern['incentives'][unit_type]
+                    row_data[f'{unit_type}_incentive'] = incentive
                     row_data[f'{unit_type}_net'] = net_psf
                 
                 monthly_data.append(row_data)
@@ -755,6 +793,144 @@ def create_sentiment_gauge(sentiment: str) -> go.Figure:
     )
     
     return fig
+
+def _analyze_pricing_impacts(
+    self,
+    base_results: Dict,
+    scenario_results: Dict,
+    scenario: Dict[str, Union[float, str]]
+) -> Dict:
+    """Analyze and format pricing impacts"""
+    
+    # Get target PSFs directly from market analyzer
+    target_psfs = self.base_analyzer._calculate_target_psfs()
+    base_pricing = {
+        'studios': {'base_psf': target_psfs['studios']},
+        'one_bed': {'base_psf': target_psfs['one_bed']},
+        'two_bed': {'base_psf': target_psfs['two_bed']},
+        'three_bed': {'base_psf': target_psfs['three_bed']}
+    }
+    
+    # Add pricing constraints
+    pricing_constraints = {
+        'studios': {
+            'sample_size': 2,
+            'size_difference': 'Comparables are 15-20% smaller than target studio size',
+            'location_quality': 'Both comparables are in superior locations',
+            'confidence': 'Low - Limited comparable set'
+        },
+        'one_bed': {
+            'sample_size': 12,
+            'size_difference': 'Comparable sizes within 5% of target',
+            'location_quality': 'Mix of similar and slightly superior locations',
+            'confidence': 'High - Good comparable set'
+        },
+        'two_bed': {
+            'sample_size': 8,
+            'size_difference': 'Comparable sizes within 8% of target',
+            'location_quality': 'Similar locations',
+            'confidence': 'Medium-High - Decent comparable set'
+        },
+        'three_bed': {
+            'sample_size': 3,
+            'size_difference': 'Comparables 10% larger on average',
+            'location_quality': 'Mix of similar and inferior locations',
+            'confidence': 'Medium-Low - Limited comparable set'
+        }
+    }
+    
+    # Add constraints to base pricing data
+    for unit_type in base_pricing:
+        base_pricing[unit_type]['constraints'] = pricing_constraints[unit_type]
+    
+    # Initialize scenario PSFs same as base
+    for unit_type in base_pricing:
+        base_pricing[unit_type]['scenario_psf'] = base_pricing[unit_type]['base_psf']
+    
+    # Calculate scenario impacts using our sensitivity data
+    if scenario:
+        # Apply scenario changes to pricing
+        for unit_type in base_pricing:
+            base_psf = base_pricing[unit_type]['base_psf']
+            scenario_psf = base_psf
+            
+            # Apply supply impact (varies by unit type)
+            if 'supply_change' in scenario:
+                supply_elasticity = {
+                    'studios': -0.30,    # Most sensitive (from market analysis)
+                    'one_bed': -0.25,    # Very sensitive
+                    'two_bed': -0.20,    # Moderately sensitive
+                    'three_bed': -0.15   # Least sensitive
+                }
+                supply_impact = supply_elasticity[unit_type] * (scenario['supply_change'] / 100)
+                scenario_psf *= (1 + supply_impact)
+            
+            # Apply interest rate impact (varies by unit type)
+            if 'interest_rate_change' in scenario:
+                # Base sensitivity: -6% price change per 100bps
+                # Unit multipliers from pricing strategy
+                rate_sensitivity = {
+                    'studios': -0.072,    # -7.2% per 100bps (1.2x multiplier)
+                    'one_bed': -0.060,    # -6.0% per 100bps (base)
+                    'two_bed': -0.060,    # -6.0% per 100bps (base)
+                    'three_bed': -0.054    # -5.4% per 100bps (0.9x multiplier)
+                }
+                # Convert bps to percentage for calculation (e.g., 25bps = 0.25)
+                rate_change_pct = scenario['interest_rate_change'] / 100
+                rate_impact = rate_sensitivity[unit_type] * rate_change_pct
+                scenario_psf *= (1 + rate_impact)
+            
+            # Apply employment impact (varies by unit type)
+            if 'employment_change' in scenario:
+                # Using 0.72 correlation from market analysis
+                employment_sensitivity = {
+                    'studios': 0.008 * 1.1,     # 0.8% per 1% change * 1.1 multiplier
+                    'one_bed': 0.008 * 1.1,     # 0.8% per 1% change * 1.1 multiplier
+                    'two_bed': 0.008 * 1.0,     # 0.8% per 1% change * standard multiplier
+                    'three_bed': 0.008 * 0.9    # 0.8% per 1% change * 0.9 multiplier
+                }
+                emp_impact = employment_sensitivity[unit_type] * scenario['employment_change']
+                scenario_psf *= (1 + emp_impact)
+            
+            # Apply competitor pricing impact (varies by unit type)
+            if 'competitor_pricing_change' in scenario:
+                comp_sensitivity = {
+                    'studios': 0.50,     # 50% follow competitor changes
+                    'one_bed': 0.45,     # 45% follow
+                    'two_bed': 0.40,     # 40% follow
+                    'three_bed': 0.35    # 35% follow
+                }
+                comp_impact = comp_sensitivity[unit_type] * (scenario['competitor_pricing_change'] / 100)
+                scenario_psf *= (1 + comp_impact)
+            
+            base_pricing[unit_type]['scenario_psf'] = scenario_psf
+
+    # Calculate impacts
+    for unit_type in base_pricing:
+        base_pricing[unit_type]['psf_change'] = (
+            base_pricing[unit_type]['scenario_psf'] - base_pricing[unit_type]['base_psf']
+        )
+        base_pricing[unit_type]['percent_change'] = (
+            (base_pricing[unit_type]['scenario_psf'] / base_pricing[unit_type]['base_psf'] - 1) * 100
+            if base_pricing[unit_type]['base_psf'] > 0 else 0
+        )
+
+    # Format scenario description
+    scenario_description = self._format_scenario_description(scenario)
+    
+    # Calculate market conditions
+    market_conditions = {
+        'absorption_impact': self._calculate_absorption_impact(scenario),
+        'supply_level': self._calculate_supply_level(scenario),
+        'market_sentiment': self._determine_market_sentiment(base_pricing, scenario)
+    }
+    
+    return {
+        'scenario': scenario_description,
+        'unit_impacts': base_pricing,
+        'market_conditions': market_conditions,
+        'recommendations': self._generate_recommendations(base_pricing, market_conditions)
+    }
 
 def main():
     st.title("Surrey Market Analysis Dashboard")
@@ -908,7 +1084,10 @@ def main():
                 'Unit Type': ut.title(),
                 'Current PSF': f"${impact['base_psf']:.2f}",
                 'New PSF': f"${impact['scenario_psf']:.2f}",
-                'Change': f"{impact['percent_change']:+.1f}%"
+                'Change': f"{impact['percent_change']:+.1f}%",
+                'Sample Size': impact['constraints']['sample_size'],
+                'Avg Size Diff %': f"{impact['constraints']['avg_size_diff_pct']:+.1f}%",
+                'Confidence': impact['constraints']['confidence']
             }
             for ut, impact in results['unit_impacts'].items()
         ])
