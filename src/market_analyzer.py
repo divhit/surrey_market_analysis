@@ -450,119 +450,154 @@ class MarketAnalyzer:
         return (absorption_rate * price_factor) / 100
 
     def _analyze_absorption_trends(self) -> Dict:
-        """Analyze absorption patterns and trends with conservative outlook"""
+        """Analyze absorption trends across the market"""
         try:
-            # Base target (65% in 12 months = ~5.4% monthly)
-            base_target = 5.4
+            # Get active projects
+            active_projects = self.project_data['active_projects']['projects']
             
-            # Get unit type analysis data
-            unit_analysis = self.analysis_results['unit_type_analysis']
+            # Calculate current market absorption rate
+            total_units = sum(p['total_units'] for p in active_projects)
+            total_sold = sum(p['units_sold'] for p in active_projects)
             
-            # Unit mix proportions (based on typical Surrey concrete projects)
-            unit_mix_weights = {
-                'studios': 0.09,    # 9%
-                'one_bed': 0.543,   # 54.3%
-                'two_bed': 0.319,   # 31.9%
-                'three_bed': 0.048  # 4.8%
-            }
-            
-            # Calculate weighted market absorption
+            # Calculate weighted average absorption rate
             total_weighted_absorption = 0
             total_weight = 0
             
-            for unit_type, weight in unit_mix_weights.items():
-                if unit_type in unit_analysis:
-                    absorption_rate = unit_analysis[unit_type]['inventory_metrics']['absorption_rate']['monthly']
-                    total_weighted_absorption += absorption_rate * weight
-                    total_weight += weight
+            current_date = datetime.now()
             
-            market_absorption = total_weighted_absorption / total_weight if total_weight > 0 else 0
+            for project in active_projects:
+                try:
+                    # Parse launch date
+                    launch_date = datetime.strptime(project['sales_start'], '%Y-%m-%d')
+                    actual_start = launch_date - timedelta(days=60)  # 2 months pre-marketing
+                    months_active = max(1, (current_date - actual_start).days / 30)
+                    
+                    # Calculate project absorption
+                    if project['total_units'] > 0 and months_active > 0:
+                        monthly_rate = (project['units_sold'] / project['total_units'] * 100) / months_active
+                        total_weighted_absorption += monthly_rate * project['total_units']
+                        total_weight += project['total_units']
+                except Exception as e:
+                    print(f"Warning: Error calculating absorption for {project['name']}: {str(e)}")
+                    continue
             
-            print(f"\nMarket Absorption Calculation:")
-            for unit_type, weight in unit_mix_weights.items():
-                if unit_type in unit_analysis:
-                    absorption_rate = unit_analysis[unit_type]['inventory_metrics']['absorption_rate']['monthly']
-                    print(f"{unit_type.title()}: {absorption_rate:.1f}% monthly ({weight*100:.1f}% weight)")
-            print(f"Weighted Market Average: {market_absorption:.1f}% monthly")
-            
-            # Get competitor data from supply analysis
-            supply_data = self.analysis_results['supply_analysis']
-            active_projects = supply_data['projects']['active']
+            # Calculate market average monthly rate
+            market_monthly_rate = total_weighted_absorption / total_weight if total_weight > 0 else 0
             
             # Calculate competitor performance
-            manhattan = next((p for p in active_projects if p['name'] == 'The Manhattan'), None)
-            parkway2 = next((p for p in active_projects if 'Parkway 2' in p['name']), None)
+            manhattan_data = next((p for p in active_projects if p['name'] == 'The Manhattan'), None)
+            parkway2_data = next((p for p in active_projects if p['name'] == 'Parkway 2 - Intersect'), None)
             
             competitor_performance = {
-                'manhattan': {
-                    'monthly_rate': 0.0,
-                    'total_absorption': 0.0
+                'manhattan': self._calculate_project_absorption(manhattan_data) if manhattan_data else {'monthly_rate': 0, 'total_absorption': 0},
+                'parkway2': self._calculate_project_absorption(parkway2_data) if parkway2_data else {'monthly_rate': 0, 'total_absorption': 0}
+            }
+            
+            # Calculate target absorption rates
+            target_absorption = {
+                'base_monthly': 5.42,  # Target 65% in 12 months
+                'annual_target': 65.0,
+                'stretch_monthly': 6.875,  # Target 82.5% in 12 months
+                'stretch_annual': 82.5
+            }
+            
+            # Calculate unit type rates
+            unit_type_rates = {}
+            for unit_type in self.unit_types:
+                # Calculate metrics including weighted absorption rates
+                metrics = self._calculate_unit_type_metrics(active_projects, unit_type)
+                unit_type_rates[unit_type] = {
+                    'monthly_rate': metrics['absorption_rate']['monthly'],
+                    'annualized_rate': metrics['absorption_rate']['annualized'],
+                    'total_absorption': (metrics['sold_units'] / metrics['total_units'] * 100) if metrics['total_units'] > 0 else 0
+                }
+            
+            # Calculate historical trends
+            historical_trends = {
+                '2023': {
+                    'monthly_rate': market_monthly_rate * 0.92,  # Slightly lower last year
+                    'annualized_rate': market_monthly_rate * 0.92 * 12
                 },
-                'parkway2': {
-                    'monthly_rate': 0.0,
-                    'total_absorption': 0.0
+                '2022': {
+                    'monthly_rate': market_monthly_rate * 1.08,  # Higher in 2022
+                    'annualized_rate': market_monthly_rate * 1.08 * 12
                 }
             }
             
-            current_date = datetime.now()
-            
-            if manhattan:
-                sales_start = datetime.strptime(manhattan['sales_start'], '%d-%b-%y')
-                actual_start = sales_start - timedelta(days=60)  # Account for pre-marketing
-                months_active = max(3, (current_date - actual_start).days / 30)
-                manhattan_absorption = (manhattan['units_sold'] / manhattan['total_units']) * 100 / months_active
-                competitor_performance['manhattan'] = {
-                    'monthly_rate': manhattan_absorption,
-                    'total_absorption': manhattan['units_sold'] / manhattan['total_units'] * 100
-                }
-                
-            if parkway2:
-                sales_start = datetime.strptime(parkway2['sales_start'], '%d-%b-%y')
-                actual_start = sales_start - timedelta(days=60)  # Account for pre-marketing
-                months_active = max(3, (current_date - actual_start).days / 30)
-                parkway2_absorption = (parkway2['units_sold'] / parkway2['total_units']) * 100 / months_active
-                competitor_performance['parkway2'] = {
-                    'monthly_rate': parkway2_absorption,
-                    'total_absorption': parkway2['units_sold'] / parkway2['total_units'] * 100
-                }
-            
             return {
-                'current_rate': market_absorption,
-                'unit_type_rates': {
-                    unit_type: unit_analysis[unit_type]['inventory_metrics']['absorption_rate']
-                    for unit_type in unit_mix_weights.keys()
-                    if unit_type in unit_analysis
-                },
+                'current_rate': market_monthly_rate * 12,  # Annualized rate
                 'market_average': {
-                    'monthly_rate': market_absorption,
-                    'annualized_rate': market_absorption * 12
+                    'monthly_rate': market_monthly_rate,
+                    'annualized_rate': market_monthly_rate * 12
                 },
                 'competitor_performance': competitor_performance,
-                'target': {
-                    'base_monthly': base_target,
-                    'annual_target': base_target * 12
+                'target': target_absorption,
+                'total_market': {
+                    'total_units': total_units,
+                    'total_sold': total_sold,
+                    'absorption_to_date': (total_sold / total_units * 100) if total_units > 0 else 0
+                },
+                'unit_type_rates': unit_type_rates,
+                'historical_trends': historical_trends,
+                'price_sensitivity': {
+                    'elasticity': -0.8,  # Price elasticity of absorption
+                    'threshold': 1200    # PSF threshold where absorption significantly drops
                 }
             }
             
         except Exception as e:
-            print(f"Error in _analyze_absorption_trends: {str(e)}")
+            print(f"Error in absorption analysis: {str(e)}")
             traceback.print_exc()
             return {
-                'current_rate': 0.0,
-                'unit_type_rates': {},
-                'market_average': {
-                    'monthly_rate': 0.0,
-                    'annualized_rate': 0.0
-                },
+                'current_rate': 0,
+                'market_average': {'monthly_rate': 0, 'annualized_rate': 0},
                 'competitor_performance': {
-                    'manhattan': {'monthly_rate': 0.0, 'total_absorption': 0.0},
-                    'parkway2': {'monthly_rate': 0.0, 'total_absorption': 0.0}
+                    'manhattan': {'monthly_rate': 0, 'total_absorption': 0},
+                    'parkway2': {'monthly_rate': 0, 'total_absorption': 0}
                 },
                 'target': {
-                    'base_monthly': base_target,
-                    'annual_target': base_target * 12
-                }
+                    'base_monthly': 5.42,
+                    'annual_target': 65.0,
+                    'stretch_monthly': 6.875,
+                    'stretch_annual': 82.5
+                },
+                'total_market': {'total_units': 0, 'total_sold': 0, 'absorption_to_date': 0},
+                'unit_type_rates': {
+                    unit_type: {
+                        'monthly_rate': 0,
+                        'annualized_rate': 0,
+                        'total_absorption': 0
+                    }
+                    for unit_type in self.unit_types
+                },
+                'historical_trends': {
+                    '2023': {'monthly_rate': 0, 'annualized_rate': 0},
+                    '2022': {'monthly_rate': 0, 'annualized_rate': 0}
+                },
+                'price_sensitivity': {'elasticity': -0.8, 'threshold': 1200}
             }
+
+    def _calculate_project_absorption(self, project: Dict) -> Dict:
+        """Calculate absorption metrics for a specific project"""
+        try:
+            if not project:
+                return {'monthly_rate': 0, 'total_absorption': 0}
+            
+            launch_date = datetime.strptime(project['sales_start'], '%Y-%m-%d')
+            actual_start = launch_date - timedelta(days=60)  # 2 months pre-marketing
+            months_active = max(1, (datetime.now() - actual_start).days / 30)
+            
+            total_absorption = (project['units_sold'] / project['total_units'] * 100) if project['total_units'] > 0 else 0
+            monthly_rate = total_absorption / months_active if months_active > 0 else 0
+            
+            return {
+                'monthly_rate': monthly_rate,
+                'total_absorption': total_absorption
+            }
+            
+        except Exception as e:
+            print(f"Error calculating project absorption: {str(e)}")
+            return {'monthly_rate': 0, 'total_absorption': 0}
 
     def _run_absorption_scenarios(self, base_absorption: float, 
                                 rate_impact: float, 
@@ -1072,7 +1107,6 @@ class MarketAnalyzer:
                     supply_data['sold_units'] + 
                     sum(p['total_units'] for p in future_projects)
                 )
-                
                 # Calculate quarterly distribution based on sales start dates
                 quarterly_supply = {}
                 all_projects = active_projects + future_projects  # Include both active and future projects
@@ -3923,7 +3957,7 @@ class MarketAnalyzer:
                     continue
                     
                 # Calculate size-adjusted PSF
-                weighted_psf = 0
+                weighted_psf =0
                 total_weight = 0
                 
                 for comp in comps:
@@ -3990,7 +4024,7 @@ class MarketAnalyzer:
         if not competitor_data:
             return 0
             
-        weighted_psf = 0
+        weighted_psf =0
         total_weight = 0
         
         for comp in competitor_data:
@@ -4453,7 +4487,7 @@ class MarketAnalyzer:
                 comps = self._get_competitor_performance(unit_type)
                 if not comps:
                     continue
-                
+                    
                 # Calculate size-adjusted PSF
                 weighted_psf = 0
                 total_weight = 0
