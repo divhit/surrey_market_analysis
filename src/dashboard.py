@@ -162,32 +162,43 @@ def process_query_with_gpt(query: str) -> dict:
 def run_staged_analysis():
     """Run the base analysis in stages with informative outputs"""
     
-    # Initialize all stages as empty containers
-    supply_container = st.empty()
-    supply_progress = st.empty()
-    supply_expander = st.empty()
-    
-    historical_container = st.empty()
-    historical_progress = st.empty()
-    historical_expander = st.empty()
-    
-    competitive_container = st.empty()
-    competitive_progress = st.empty()
-    competitive_expander = st.empty()
-    
-    macro_container = st.empty()
-    macro_progress = st.empty()
-    macro_expander = st.empty()
-    
-    pricing_container = st.empty()
-    pricing_progress = st.empty()
-    pricing_expander = st.empty()
-    
     try:
         # Load data
         project_data, macro_data = load_data()
         
+        # Initialize analyzers
+        analyzer = MarketAnalyzer(project_data, macro_data)
+        market_analysis = analyzer.analyze_market()
+        
+        # Get market metrics for pricing strategy
+        market_metrics = project_data.get('market_metrics', {})
+        base_psf = market_metrics.get('pricing_trends', {}).get('market_average_psf', 1200)  # Default value if not found
+        
+        # Initialize default metrics in case they're missing
+        if 'absorption_trends' not in market_metrics:
+            market_metrics['absorption_trends'] = {
+                'monthly_rate': 5.4,
+                'price_sensitivity': -0.8,
+                'seasonal_factors': {
+                    'Q1': 0.9,
+                    'Q2': 1.1,
+                    'Q3': 1.2,
+                    'Q4': 0.8
+                }
+            }
+        
+        if 'pricing_trends' not in market_metrics:
+            market_metrics['pricing_trends'] = {
+                'market_average_psf': base_psf,
+                'yoy_growth': 4.5,
+                'premium_range': [-5, 15]
+            }
+        
         # Stage 1: Market Supply Analysis
+        supply_container = st.empty()
+        supply_progress = st.empty()
+        supply_expander = st.empty()
+        
         supply_container.write("🔄 Stage 1: Analyzing Market Supply...")
         for i in range(100):
             supply_progress.progress(i + 1)
@@ -259,6 +270,10 @@ def run_staged_analysis():
             st.line_chart(df_construction)
         
         # Stage 2: Historical Performance Analysis
+        historical_container = st.empty()
+        historical_progress = st.empty()
+        historical_expander = st.empty()
+        
         historical_container.write("🔄 Stage 2: Analyzing Historical Performance...")
         for i in range(100):
             historical_progress.progress(i + 1)
@@ -272,9 +287,12 @@ def run_staged_analysis():
             with col2:
                 st.metric("Historical Price Growth", "+24.6%")
                 st.metric("Price Growth CAGR", "4.5%")
-        time.sleep(1)
         
         # Stage 3: Competitive Analysis
+        competitive_container = st.empty()
+        competitive_progress = st.empty()
+        competitive_expander = st.empty()
+        
         competitive_container.write("🔄 Stage 3: Analyzing Competitive Landscape...")
         for i in range(100):
             competitive_progress.progress(i + 1)
@@ -283,14 +301,17 @@ def run_staged_analysis():
         with competitive_expander.expander("Competitive Analysis Results", expanded=True):
             col1, col2 = st.columns(2)
             with col1:
-                st.metric("Market Average PSF", "$1,145")
+                st.metric("Market Average PSF", f"${base_psf:,.0f}")
                 st.metric("Our Position vs Market", "Above Average")
             with col2:
                 st.metric("Active Competitors", "7 projects")
                 st.metric("Competitive Price Range", "$1,018 - $1,230 PSF")
-        time.sleep(1)
         
         # Stage 4: Macro Factor Analysis
+        macro_container = st.empty()
+        macro_progress = st.empty()
+        macro_expander = st.empty()
+        
         macro_container.write("🔄 Stage 4: Analyzing Macro Factors...")
         for i in range(100):
             macro_progress.progress(i + 1)
@@ -304,61 +325,9 @@ def run_staged_analysis():
             with col2:
                 st.metric("5-Year Fixed Rate", "4.52%", "-0.27%")
                 st.metric("Prime Rate", "6.95%", "+0.25%")
-            
-            st.write("Historical Interest Rate Trends:")
-            rate_data = {
-                'Period': [
-                    '2020-Q1', '2020-Q2', '2020-Q3', '2020-Q4',
-                    '2021-Q1', '2021-Q2', '2021-Q3', '2021-Q4',
-                    '2022-Q1', '2022-Q2', '2022-Q3', '2022-Q4',
-                    '2023-Q1', '2023-Q2', '2023-Q3', '2023-Q4',
-                    '2024-Q1', '2024-Q2'  # Added 2024 projections
-                ],
-                '5-Year Fixed': [
-                    2.89, 2.45, 2.14, 1.99,
-                    2.14, 2.45, 2.89, 3.24,
-                    3.89, 4.25, 4.89, 5.12,
-                    5.24, 4.89, 4.67, 4.52,
-                    4.45, 4.25  # 2024 projections
-                ],
-                'Prime Rate': [
-                    3.95, 3.45, 2.95, 2.45,
-                    2.45, 2.45, 2.45, 2.45,
-                    3.70, 4.70, 5.45, 6.45,
-                    6.70, 6.95, 6.95, 6.95,
-                    6.70, 6.45  # 2024 projections
-                ]
-            }
-            df_rates = pd.DataFrame(rate_data)
-            df_rates.set_index('Period', inplace=True)
-            st.line_chart(df_rates)
-        time.sleep(1)
-        
-        # Stage 5: Price Optimization
-        pricing_container.write("🔄 Stage 5: Optimizing Pricing Strategy...")
-        for i in range(100):
-            pricing_progress.progress(i + 1)
-            time.sleep(0.02)
-        
-        with pricing_expander.expander("Pricing Strategy Results", expanded=True):
-            pricing_data = {
-                'Unit Type': ['Studios', 'One Bed', 'Two Bed', 'Three Bed'],
-                'Target PSF': ['$1,241.95', '$1,146.74', '$1,068.63', '$1,036.32'],
-                'Monthly Absorption': ['5.4%', '5.4%', '5.4%', '5.4%']
-            }
-            st.dataframe(pd.DataFrame(pricing_data))
-        time.sleep(1)
         
         # Final Report Generation
         st.success("✅ Analysis Complete! Generating Excel Report...")
-        
-        # Initialize analyzers
-        analyzer = MarketAnalyzer(project_data, macro_data)
-        market_analysis = analyzer.analyze_market()
-        
-        # Get market metrics for pricing strategy
-        market_metrics = project_data['market_metrics']
-        base_psf = market_metrics['pricing_trends']['market_average_psf']
         
         # Generate Excel report directly
         report_gen = ReportGenerator(
@@ -386,6 +355,8 @@ def run_staged_analysis():
             
     except Exception as e:
         st.error(f"Error during analysis: {str(e)}")
+        st.write("Full error details:")
+        st.write(e)
         st.stop()
 
 def run_scenario_analysis(scenario: dict, results: dict) -> tuple[str, str]:
