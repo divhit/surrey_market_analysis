@@ -5,6 +5,7 @@ import numpy as np
 from datetime import datetime
 import json
 from typing import Dict, List, Any
+import os
 
 class DataProcessor:
     def __init__(self, data_dir: str):
@@ -232,13 +233,33 @@ class DataProcessor:
 
     def save_processed_data(self):
         """Save processed data to JSON files"""
-        # Save project data
-        with open(f"{self.data_dir}/processed/surrey_project_data.json", 'w') as f:
-            json.dump(self.processed_data['project_data'], f, indent=2)
+        try:
+            # Ensure data directory exists
+            os.makedirs(f"{self.data_dir}/processed", exist_ok=True)
             
-        # Save macro data
-        with open(f"{self.data_dir}/processed/surrey_macro_data.json", 'w') as f:
-            json.dump(self.processed_data['macro_data'], f, indent=2)
+            # Save project data with consistent structure
+            project_data = {
+                'project_data': self.processed_data['project_data']
+            }
+            
+            with open(f"{self.data_dir}/processed/surrey_project_data.json", 'w') as f:
+                json.dump(project_data, f, indent=2)
+            
+            # Save macro data with consistent structure
+            macro_data = {
+                'macro_indicators': self.processed_data['macro_data']
+            }
+            
+            with open(f"{self.data_dir}/processed/surrey_macro_data.json", 'w') as f:
+                json.dump(macro_data, f, indent=2)
+                
+            print("\nSaved processed data with structure:")
+            print("Project Data Keys:", list(project_data.keys()))
+            print("Macro Data Keys:", list(macro_data.keys()))
+            
+        except Exception as e:
+            print(f"Error saving processed data: {str(e)}")
+            raise
 
     def _preprocess_launches_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Preprocess launches data to clean and standardize"""

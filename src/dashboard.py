@@ -31,13 +31,33 @@ st.set_page_config(
 @st.cache_data
 def load_data():
     """Load and cache market data"""
-    with open('data/processed/surrey_project_data.json', 'r') as f:
-        project_data = json.load(f)['content']['project_data']
-    
-    with open('data/processed/surrey_macro_data.json', 'r') as f:
-        macro_data = json.load(f)['content']['macro_indicators']
-    
-    return project_data, macro_data
+    try:
+        # Load project data
+        with open('data/processed/surrey_project_data.json', 'r') as f:
+            project_data_json = json.load(f)
+            # Handle both structures (with or without 'content' wrapper)
+            project_data = project_data_json.get('content', {}).get('project_data', project_data_json)
+        
+        # Load macro data
+        with open('data/processed/surrey_macro_data.json', 'r') as f:
+            macro_data_json = json.load(f)
+            # Handle both structures (with or without 'content' wrapper)
+            macro_data = macro_data_json.get('content', {}).get('macro_indicators', macro_data_json)
+        
+        print("\nLoaded Project Data Structure:")
+        print("Active Projects:")
+        for project in project_data.get('active_projects', {}).get('projects', []):
+            print(f"{project['name']}:")
+            print(f"  total_units: {project.get('total_units')}")
+            print(f"  units_sold: {project.get('units_sold')}")
+            print(f"  standing_units: {project.get('standing_units')}")
+        
+        return project_data, macro_data
+        
+    except Exception as e:
+        print(f"Error loading data: {str(e)}")
+        st.error(f"Error loading market data: {str(e)}")
+        raise
 
 def create_psf_chart(unit_impacts):
     # Create bar chart data
