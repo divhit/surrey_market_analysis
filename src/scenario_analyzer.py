@@ -5,12 +5,35 @@ from datetime import datetime
 import copy
 
 class PricingScenarioAnalyzer:
-    def __init__(self, project_data: Dict, macro_data: Dict):
+    def __init__(self, project_data: Dict, macro_data: Dict, market_analysis: Optional[Dict] = None):
         """Initialize with base project and macro data"""
         self.base_project_data = copy.deepcopy(project_data)
         self.base_macro_data = copy.deepcopy(macro_data)
         self.base_analyzer = MarketAnalyzer(project_data, macro_data)
-        self.base_pricing = self.base_analyzer.analyze_market()
+        
+        # Use provided market analysis if available, otherwise run analysis
+        self.base_analysis = market_analysis if market_analysis is not None else self.base_analyzer.analyze_market()
+        
+        # Ensure absorption analysis exists
+        if 'absorption_analysis' not in self.base_analysis:
+            self.base_analysis['absorption_analysis'] = self.base_analyzer._analyze_absorption_trends()
+        
+        # Store base pricing from analysis
+        self.base_pricing = self.base_analysis
+    
+    def analyze_base_scenario(self) -> Dict:
+        """Analyze base scenario without any changes"""
+        return {
+            'pricing_strategy': {
+                'base_psf': self.base_analysis['pricing_analysis']['current_metrics']['avg_psf'],
+                'absorption_trends': self.base_analysis['absorption_analysis'],
+                'pricing_trends': self.base_analysis['pricing_analysis']
+            },
+            'simulation_results': {
+                'base_case': self.base_analysis,
+                'scenario_impacts': None
+            }
+        }
         
     def analyze_scenario(self, scenario: Dict[str, Union[float, str]]) -> Dict:
         """
@@ -33,7 +56,7 @@ class PricingScenarioAnalyzer:
         
         # Calculate and format pricing impacts
         impact_analysis = self._analyze_pricing_impacts(
-            self.base_pricing,
+            self.base_analysis,
             scenario_results,
             scenario
         )
